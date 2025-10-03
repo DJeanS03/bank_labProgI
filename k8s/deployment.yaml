@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-lab-prog-i-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bank-lab-prog-i
+  template:
+    metadata:
+      labels:
+        app: bank-lab-prog-i
+    spec:
+      containers:
+        - name: bank-lab-prog-i
+          image: bank_lab-prog-i:1.0
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
