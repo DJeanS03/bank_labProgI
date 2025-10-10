@@ -1,0 +1,3 @@
+# Camada Domain - Modulo Hello World
+
+Esta camada contm a entidade de negocio Hello.
