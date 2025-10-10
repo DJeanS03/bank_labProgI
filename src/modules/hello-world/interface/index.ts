@@ -1,0 +1,4 @@
+﻿// Este arquivo exportará os contratos públicos do módulo hello-world.
+// Interfaces: IHelloController, IHelloPresenter
+// DTOs: HelloRequestDTO, HelloResponseDTO
+// Será usado como ponto de entrada para os contratos desta camada.
