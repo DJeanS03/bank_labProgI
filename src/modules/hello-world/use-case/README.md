@@ -1,0 +1,5 @@
+# Camada Use-Case - Modulo Hello World
+
+Esta camada define os casos de uso da aplicação.
+
+

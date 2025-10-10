@@ -1,0 +1,15 @@
+﻿# interface
+
+**Propósito**: Definir contratos públicos (ports inbound/outbound) e DTOs do módulo Hello World.
+
+**O que ficará aqui**: 
+- Interfaces que conectam controller → use-case → presenter.
+- DTOs de entrada (request) e saída (response).
+
+**Contratos definidos neste módulo**:
+- \IHelloController\: define o método \handle\.
+- \IHelloPresenter\: define o método \present\.
+- \HelloRequestDTO\: estrutura da requisição (ex: name).
+- \HelloResponseDTO\: estrutura da resposta (ex: message).
+
+**Observação**: Nenhuma implementação deve ser feita aqui — apenas definição de tipos e contratos.
