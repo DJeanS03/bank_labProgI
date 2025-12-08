@@ -45,12 +45,24 @@ export class AdminUserUseCasesImpl implements AdminUserUseCases {
       throw new Error('Name is required');
     }
 
+    if (name.length < 3) {
+      throw new Error('Name must have at least 3 characters');
+    }
+
     if (!email) {
       throw new Error('Email is required');
     }
 
+    if (!this.isValidEmail(email)) {
+      throw new Error('Invalid email format');
+    }
+
     if (!password) {
       throw new Error('Password is required');
+    }
+
+    if (password.length < 6) {
+      throw new Error('Password must have at least 6 characters');
     }
 
     const existing = await this.adminRepo.findByEmail(email);
@@ -125,6 +137,9 @@ export class AdminUserUseCasesImpl implements AdminUserUseCases {
     if (typeof data.name === 'string') {
       const trimmed = data.name.trim();
       if (trimmed.length > 0) {
+        if (trimmed.length < 3) {
+          throw new Error('Name must have at least 3 characters');
+        }
         admin.name = trimmed;
       }
     }
@@ -132,6 +147,9 @@ export class AdminUserUseCasesImpl implements AdminUserUseCases {
     if (typeof data.email === 'string') {
       const trimmedEmail = data.email.trim().toLowerCase();
       if (trimmedEmail.length > 0 && trimmedEmail !== admin.email) {
+        if (!this.isValidEmail(trimmedEmail)) {
+          throw new Error('Invalid email format');
+        }
         const existing = await this.adminRepo.findByEmail(trimmedEmail);
         if (existing && existing.id !== admin.id) {
           throw new AdminEmailAlreadyExistsError(trimmedEmail);
@@ -149,6 +167,9 @@ export class AdminUserUseCasesImpl implements AdminUserUseCases {
     }
 
     if (typeof data.password === 'string' && data.password.length > 0) {
+      if (data.password.length < 6) {
+        throw new Error('Password must have at least 6 characters');
+      }
       admin.passwordHash = this.hashPassword(data.password);
     }
 
@@ -169,6 +190,11 @@ export class AdminUserUseCasesImpl implements AdminUserUseCases {
 
   private hashPassword(password: string): string {
     return `hashed:${password}`;
+  }
+
+  private isValidEmail(email: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
   }
 
   private toResponseDTO(admin: AdminUser): AdminUserResponseDTO {

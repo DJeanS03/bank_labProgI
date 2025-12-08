@@ -12,6 +12,6 @@ import { InMemoryMachineRepository } from './InMemoryMachineRepository';
       useClass: InMemoryMachineRepository,
     },
   ],
-  exports: [MachineUseCasesImpl],
+  exports: [MachineUseCasesImpl, 'MachineRepository'],
 })
 export class MachinesModule {}
