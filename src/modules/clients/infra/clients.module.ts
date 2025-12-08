@@ -12,6 +12,6 @@ import { InMemoryClientRepository } from './InMemoryClientRepository';
       useClass: InMemoryClientRepository,
     },
   ],
-  exports: [ClientUseCasesImpl],
+  exports: [ClientUseCasesImpl, 'ClientRepository'],
 })
 export class ClientsModule {}

@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { Client, ClientAddress } from '../domain/Client';
+import type {
+  Client,
+  ClientAddress,
+  ClientDocumentType,
+} from '../domain/Client';
 import type { ClientRepository } from '../domain/ClientRepository';
 import type { ClientUseCases, ClientListQuery } from './ClientUseCases';
 import type {
@@ -41,12 +45,24 @@ export class ClientUseCasesImpl implements ClientUseCases {
       throw new Error('Name is required');
     }
 
+    if (name.length < 3) {
+      throw new Error('Name must have at least 3 characters');
+    }
+
     if (!documentNumber) {
       throw new Error('Document number is required');
     }
 
     if (!documentType) {
       throw new Error('Document type is required');
+    }
+
+    if (!this.isValidDocument(documentNumber, documentType)) {
+      throw new Error('Invalid document number for document type');
+    }
+
+    if (data.email && !this.isValidEmail(data.email)) {
+      throw new Error('Invalid email format');
     }
 
     const existing = await this.clientRepo.findByDocumentNumber(documentNumber);
@@ -61,7 +77,11 @@ export class ClientUseCasesImpl implements ClientUseCases {
 
     let birthDate: Date | null = null;
     if (typeof data.birthDate === 'string' && data.birthDate.length > 0) {
-      birthDate = new Date(data.birthDate);
+      const parsed = new Date(data.birthDate);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new Error('Invalid birthDate format');
+      }
+      birthDate = parsed;
     }
 
     const client: Client = {
@@ -126,13 +146,23 @@ export class ClientUseCasesImpl implements ClientUseCases {
     if (typeof data.name === 'string') {
       const trimmed = data.name.trim();
       if (trimmed.length > 0) {
+        if (trimmed.length < 3) {
+          throw new Error('Name must have at least 3 characters');
+        }
         client.name = trimmed;
       }
     }
 
     if (typeof data.email === 'string') {
       const trimmed = data.email.trim();
-      client.email = trimmed.length > 0 ? trimmed : null;
+      if (trimmed.length > 0) {
+        if (!this.isValidEmail(trimmed)) {
+          throw new Error('Invalid email format');
+        }
+        client.email = trimmed;
+      } else {
+        client.email = null;
+      }
     }
 
     if (typeof data.phone === 'string') {
@@ -150,7 +180,11 @@ export class ClientUseCasesImpl implements ClientUseCases {
 
     if ('birthDate' in data) {
       if (typeof data.birthDate === 'string' && data.birthDate.length > 0) {
-        client.birthDate = new Date(data.birthDate);
+        const parsed = new Date(data.birthDate);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new Error('Invalid birthDate format');
+        }
+        client.birthDate = parsed;
       } else {
         client.birthDate = null;
       }
@@ -216,5 +250,24 @@ export class ClientUseCasesImpl implements ClientUseCases {
       updatedAt: client.updatedAt.toISOString(),
       birthDate: client.birthDate ? client.birthDate.toISOString() : null,
     };
+  }
+
+  private isValidEmail(email: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
+  private isValidDocument(
+    documentNumber: string,
+    documentType: ClientDocumentType,
+  ): boolean {
+    const digits = documentNumber.replace(/\D/g, '');
+    if (documentType === 'CPF') {
+      return digits.length === 11;
+    }
+    if (documentType === 'CNPJ') {
+      return digits.length === 14;
+    }
+    return false;
   }
 }
